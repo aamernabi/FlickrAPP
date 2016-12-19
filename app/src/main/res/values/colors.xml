@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#73ca10</color>
+    <color name="colorPrimaryDark">#417902</color>
+    <color name="colorAccent">#17bebb</color>
+
+    <color name="drawerArrowColor">@android:color/white</color>
+    <color name="view_color">#c1c1c1</color>
+    <color name="background_transparent">#c8000000</color>
+</resources>

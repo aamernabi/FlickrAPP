@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">Flickr</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="image_description">Image descriptions</string>
+    <string name="hint_search">Search Flickr</string>
+    <string name="search">Search</string>
+    <string name="submit">SUBMIT</string>
+    <string name="hint_enter_pin">ENTER PIN</string>
+
+    <!--params-->
+    <string name="api_key">api_key</string>
+    <string name="method">method</string>
+    <string name="mini_token">mini_token</string>
+    <string name="api_sig">api_sig</string>
+    <string name="auth_token">auth_token</string>
+    <string name="user_idd">user_id</string>
+
+
+    <!--SharedPreferences-->
+    <string name="login_info_preferences">LoginInfoPreferences</string>
+    <string name="search_query_preferences">SearchQueryPreferences</string>
+
+    <!--Login info-->
+    <string name="logged_in">loggedIN</string>
+    <string name="full_token">fullToken</string>
+    <string name="perms">permissions</string>
+    <string name="user_name">userName</string>
+    //todo rename it
+    <string name="user_id">userId</string>
+    <string name="full_name">fullName</string>
+
+    // nav drawer
+    <string name="title_activity_dashboard">Dashboard</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="public_photos">Search Photos</string>
+    <string name="my_photos">My Photos</string>
+    <string name="sign_out">Sign out</string>
+    <string name="sign_in">Sign in</string>
+
+    <!-- Toolbar titles when navigation menu item is selected -->
+    <string-array name="nav_item_toolbar_titles">
+        <item>Flickr</item>
+        <item>My Photos</item>
+        <item>Search Photos</item>
+    </string-array>
+
+    <string name="who_can_see">Who can see this?</string>
+    <string name="text_public">Everyone</string>
+    <string name="text_friends">Friends</string>
+    <string name="text_family">Family</string>
+    <string name="text_upload">UPLOAD</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
