@@ -1,6 +1,5 @@
 package com.pixerf.flickr.view.fragment;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -17,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.pixerf.flickr.R;
@@ -33,6 +33,7 @@ public class FragmentSearchPhotos extends Fragment {
     private static final int NO_OF_COLS = 2;
     private static final int ITEM_PER_PAGE = 100;
 
+    private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private PhotoAdapter adapter;
 
@@ -52,6 +53,9 @@ public class FragmentSearchPhotos extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search_photos, container, false);
+
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -92,20 +96,21 @@ public class FragmentSearchPhotos extends Fragment {
         int totalItems = recyclerView.getLayoutManager().getItemCount();
         int page = totalItems / ITEM_PER_PAGE + 1;
 
+        Log.e(TAG, "page = " + page);
 
         new PhotosTask(searchQuery, page).execute();
     }
 
     private void setRecyclerView(List<Photo> photoList) {
         if (photoList != null) {
-            for (Photo photo : photoList) {
+            /*for (Photo photo : photoList) {
                 Log.e(TAG, "id :" + photo.getId());
                 Log.e(TAG, "owner :" + photo.getOwner());
                 Log.e(TAG, "secret :" + photo.getSecret());
                 Log.e(TAG, "server :" + photo.getServer());
                 Log.e(TAG, "title :" + photo.getTitle());
                 Log.e(TAG, "--------------------------");
-            }
+            }*/
 
             adapter = new PhotoAdapter(getActivity(), photoList);
             recyclerView.setAdapter(adapter);
@@ -128,6 +133,7 @@ public class FragmentSearchPhotos extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String searchQuery) {
                 if (!(searchQuery.trim().isEmpty()))
+                    progressBar.setVisibility(View.VISIBLE);
                     refresh(searchQuery);
                 return false;
             }
@@ -181,7 +187,6 @@ public class FragmentSearchPhotos extends Fragment {
     }
 
     private class PhotosTask extends AsyncTask<Void, Void, Photos> {
-        private ProgressDialog dialog;
         private String searchQuery;
         private int page;
 
@@ -192,9 +197,7 @@ public class FragmentSearchPhotos extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            dialog = new ProgressDialog(getActivity());
-            dialog.setMessage("Fetching your photos");
-            dialog.show();
+
         }
 
         @Override
@@ -204,7 +207,7 @@ public class FragmentSearchPhotos extends Fragment {
 
         @Override
         protected void onPostExecute(Photos photos) {
-            dialog.dismiss();
+            progressBar.setVisibility(View.GONE);
             if (photos != null) {
                 if (photos.getStat().equalsIgnoreCase("ok")) {
                     setRecyclerView(photos.getPhotoList());

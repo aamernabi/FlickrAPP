@@ -48,6 +48,7 @@ public class Dashboard extends AppCompatActivity implements
     public static int navItemIndex = 0;
     public static String CURRENT_TAG = TAG_HOME;
     TextView textViewUserName, textViewFullName;
+    FloatingActionButton fab;
     private Toolbar toolbar;
     private String[] toolbarTitles;
     private Handler mHandler;
@@ -63,7 +64,7 @@ public class Dashboard extends AppCompatActivity implements
         toolbarTitles = getResources().getStringArray(R.array.nav_item_toolbar_titles);
         setToolbarTitle();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -174,8 +175,10 @@ public class Dashboard extends AppCompatActivity implements
     private Fragment getCurrentFragment() {
         switch (navItemIndex) {
             case 0:
+                fab.setVisibility(View.GONE);
                 return new FragmentSearchPhotos();
             case 1:
+                fab.setVisibility(View.VISIBLE);
                 return new FragmentMyPhotos();
             default:
                 return new FragmentMyPhotos();

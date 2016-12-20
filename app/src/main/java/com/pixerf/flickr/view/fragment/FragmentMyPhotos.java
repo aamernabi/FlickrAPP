@@ -1,6 +1,5 @@
 package com.pixerf.flickr.view.fragment;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -13,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.pixerf.flickr.R;
@@ -34,6 +34,7 @@ public class FragmentMyPhotos extends Fragment {
     private static final int ITEM_PER_PAGE = 100;
 
     private RecyclerView recyclerView;
+    private ProgressBar progressBar;
 
     private OnFragmentInteractionListener mListener;
 
@@ -51,6 +52,8 @@ public class FragmentMyPhotos extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_photos, container, false);
 
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(NO_OF_COLS, StaggeredGridLayoutManager.VERTICAL));
@@ -132,7 +135,6 @@ public class FragmentMyPhotos extends Fragment {
 
     private class PhotosTask extends AsyncTask<Void, Void, Photos> {
         private LinkedHashMap<String, String> params;
-        private ProgressDialog dialog;
 
         PhotosTask(LinkedHashMap<String, String> params) {
             this.params = params;
@@ -140,9 +142,7 @@ public class FragmentMyPhotos extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            dialog = new ProgressDialog(getActivity());
-            dialog.setMessage("Fetching your photos");
-            dialog.show();
+            progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -152,7 +152,7 @@ public class FragmentMyPhotos extends Fragment {
 
         @Override
         protected void onPostExecute(Photos photos) {
-            dialog.dismiss();
+            progressBar.setVisibility(View.GONE);
             if (photos != null) {
                 if (photos.getStat().equalsIgnoreCase("ok")) {
                     setRecyclerView(photos.getPhotoList());
