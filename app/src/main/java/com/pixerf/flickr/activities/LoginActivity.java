@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -65,9 +64,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
 
                 @Override
-                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest resourceRequest) {
-                    view.loadUrl(resourceRequest.getUrl().toString());
-                    return super.shouldOverrideUrlLoading(view, resourceRequest);
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    view.loadUrl(url);
+                    return super.shouldOverrideUrlLoading(view, url);
                 }
             });
             webView.getSettings().setLoadsImagesAutomatically(true);

@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import com.pixerf.flickr.R;
 import com.pixerf.flickr.activities.PhotoActivity;
 import com.pixerf.flickr.model.Photo;
-import com.squareup.picasso.Picasso;
+import com.pixerf.flickr.utils.imageutils.ImageLoader;
 
 import java.util.List;
 
@@ -24,10 +24,12 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     private final static String TAG = PhotoAdapter.class.getSimpleName();
     private Context context;
     private List<Photo> photoList;
+    private ImageLoader imageLoader;
 
     public PhotoAdapter(Context context, List<Photo> photos) {
         this.context = context;
         this.photoList = photos;
+        this.imageLoader = new ImageLoader(context);
     }
 
     @Override
@@ -39,8 +41,8 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Photo photo = photoList.get(position);
-        // TODO: 12/18/2016 Remove Picasso and implement Lazy Loading..
-        Picasso.with(context).load(photo.getUrl()).into(holder.imageViewPhoto);
+        // lazy-loading image
+        imageLoader.load(photo.getUrl(), holder.imageViewPhoto);
 
         holder.imageViewPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,7 +66,6 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-
         ImageView imageViewPhoto;
 
         ViewHolder(View itemView) {

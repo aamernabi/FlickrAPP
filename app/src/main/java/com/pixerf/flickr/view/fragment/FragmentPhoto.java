@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,19 +16,20 @@ import android.widget.TextView;
 
 import com.pixerf.flickr.R;
 import com.pixerf.flickr.model.Photo;
-import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 
 public class FragmentPhoto extends Fragment {
 
     public static final String TAG = FragmentPhoto.class.getSimpleName();
     private ImageView imageViewPhoto;
-    private TextView textViewTitle;
     private ProgressBar progressBar;
+    private LruCache<String, Bitmap> imageCache;
+    private volatile boolean running = true;
 
     public FragmentPhoto() {
         // Required empty public constructor
@@ -43,17 +45,46 @@ public class FragmentPhoto extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         imageViewPhoto = (ImageView) view.findViewById(R.id.imageViewPhoto);
-        textViewTitle = (TextView) view.findViewById(R.id.textViewTitle);
+        TextView textViewTitle = (TextView) view.findViewById(R.id.textViewTitle);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.GONE);
-
+        setUpImageCache();
         Photo photo = getActivity().getIntent().getParcelableExtra("photo");
-        Picasso.with(getActivity()).load(photo.getUrl()).into(imageViewPhoto);
+        load(photo);
         textViewTitle.setText(photo.getTitle());
         return view;
     }
 
+    private void setUpImageCache() {
+        // calculating cache size..
+        final int maxMemory = (int) Runtime.getRuntime().maxMemory() / 1024;
+        final int cacheSize = maxMemory / 8;
+        imageCache = new LruCache<>(cacheSize);
+    }
+
+    // Lazy-Loading image
+    private void load(Photo photo) {
+        Bitmap bitmap = imageCache.get(photo.getUrl());
+        if (bitmap != null) {
+            imageViewPhoto.setImageBitmap(bitmap);
+        } else {
+            new ImageLoader(photo.getUrl()).execute();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        running = false;
+    }
+
     class ImageLoader extends AsyncTask<String, Void, Bitmap> {
+
+        private final String url;
+
+        ImageLoader(String url) {
+            this.url = url;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -62,17 +93,26 @@ public class FragmentPhoto extends Fragment {
 
         @Override
         protected Bitmap doInBackground(String... url) {
-            try {
-                InputStream is = (InputStream) new URL(url[0]).getContent();
-                // TODO: 12/18/2016 Out of memory exception.. may occur
-                Bitmap bitmap = BitmapFactory.decodeStream(is);
-                is.close();
-                return bitmap;
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e(TAG, e.getMessage());
-                return null;
+            if (running) {
+                try {
+                    InputStream is = (InputStream) new URL(this.url).getContent();
+                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    is.close();
+                    return bitmap;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage());
+                } catch (OutOfMemoryError e) {
+                    imageCache.evictAll();
+                    Log.e(TAG, e.getMessage() + ", " + Arrays.toString(e.getStackTrace()));
+                }
             }
+            return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            running = false;
         }
 
         @Override
@@ -80,6 +120,7 @@ public class FragmentPhoto extends Fragment {
             progressBar.setVisibility(View.GONE);
             if (bitmap != null) {
                 imageViewPhoto.setImageBitmap(bitmap);
+                imageCache.put(url, bitmap);
             }
         }
     }
