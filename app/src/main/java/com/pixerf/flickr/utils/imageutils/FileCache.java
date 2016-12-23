@@ -1,7 +1,6 @@
 package com.pixerf.flickr.utils.imageutils;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -24,9 +23,7 @@ class FileCache {
         else
             cacheDir = context.getCacheDir();
         if (!cacheDir.exists()) {
-            boolean b = cacheDir.mkdirs();
-            if (b)
-                Log.d(TAG, "cache dir created.. ");
+            cacheDir.mkdirs();
         }
     }
 
@@ -40,10 +37,7 @@ class FileCache {
         if (files == null)
             return;
         for (File f : files) {
-            boolean b = f.delete();
-            if (b)
-                Log.d(TAG, "file deleted.. " + f.getName());
+            f.delete();
         }
-
     }
 }

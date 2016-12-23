@@ -1,4 +1,4 @@
-package com.pixerf.flickr.activities;
+package com.pixerf.flickr.view.activities;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

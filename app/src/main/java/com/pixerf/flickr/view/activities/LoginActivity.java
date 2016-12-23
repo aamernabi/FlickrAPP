@@ -1,4 +1,4 @@
-package com.pixerf.flickr.activities;
+package com.pixerf.flickr.view.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;

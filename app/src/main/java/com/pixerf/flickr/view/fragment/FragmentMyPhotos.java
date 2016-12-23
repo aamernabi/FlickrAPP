@@ -22,6 +22,7 @@ import com.pixerf.flickr.photos.FlickrPhotos;
 import com.pixerf.flickr.utils.UrlUtils;
 import com.pixerf.flickr.view.adapter.PhotoAdapter;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -32,10 +33,12 @@ public class FragmentMyPhotos extends Fragment {
     private static final String TAG = FragmentMyPhotos.class.getSimpleName();
     private static final int NO_OF_COLS = 2;
     private static final int ITEM_PER_PAGE = 100;
-
+    int visibleItemCount, totalItemCount, previousVisibleItem;
+    private boolean isLoading = false;
+    private boolean hasMorePhotos = true;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-
+    private PhotoAdapter adapter;
     private OnFragmentInteractionListener mListener;
 
     public FragmentMyPhotos() {
@@ -57,6 +60,27 @@ public class FragmentMyPhotos extends Fragment {
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(NO_OF_COLS, StaggeredGridLayoutManager.VERTICAL));
+
+        adapter = new PhotoAdapter(getActivity(), new ArrayList<Photo>());
+        recyclerView.setAdapter(adapter);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0) {
+                    visibleItemCount = recyclerView.getLayoutManager().getChildCount();
+                    totalItemCount = recyclerView.getLayoutManager().getItemCount();
+                    int[] arr = ((StaggeredGridLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPositions(null);
+                    previousVisibleItem = arr[0];
+
+                    if (!isLoading && hasMorePhotos) {
+                        if ((visibleItemCount + previousVisibleItem) >= totalItemCount) {
+                            getUserPhotos();
+                        }
+                    }
+                }
+            }
+        });
 
         getUserPhotos();
 
@@ -88,8 +112,8 @@ public class FragmentMyPhotos extends Fragment {
     }
 
     private void getUserPhotos() {
-        //int totalItems = recyclerView.getLayoutManager().getItemCount();
-        //int page = totalItems/ITEM_PER_PAGE + 1;
+        int totalItems = recyclerView.getLayoutManager().getItemCount();
+        int page = totalItems / ITEM_PER_PAGE + 1;
 
         SharedPreferences preferences = getActivity().getApplicationContext()
                 .getSharedPreferences(getResources().getString(R.string.login_info_preferences), MODE_PRIVATE);
@@ -100,12 +124,13 @@ public class FragmentMyPhotos extends Fragment {
         // TODO: 12/18/2016 Rename user_idd with user id
         params.put(getResources().getString(R.string.user_idd),
                 preferences.getString(getResources().getString(R.string.user_id), null));
+        params.put("page", String.valueOf(page));
         params.put("format", "json");
         params.put("nojsoncallback", "1");
         params.put(getResources().getString(R.string.auth_token),
                 preferences.getString(getResources().getString(R.string.full_token), null));
 
-        new PhotosTask(params).execute();
+        new PhotosTask(params, page).execute();
     }
 
     private void setRecyclerView(List<Photo> photoList) {
@@ -119,8 +144,9 @@ public class FragmentMyPhotos extends Fragment {
                 Log.e(TAG, "--------------------------");
             }
 
-            PhotoAdapter adapter = new PhotoAdapter(getActivity(), photoList);
-            recyclerView.setAdapter(adapter);
+            adapter.add(photoList);
+            adapter.notifyDataSetChanged();
+
         } else {
             Toast.makeText(getActivity(),
                     "Something went wrong. Make sure you have an active internet connection",
@@ -135,14 +161,17 @@ public class FragmentMyPhotos extends Fragment {
 
     private class PhotosTask extends AsyncTask<Void, Void, Photos> {
         private LinkedHashMap<String, String> params;
+        private int page;
 
-        PhotosTask(LinkedHashMap<String, String> params) {
+        PhotosTask(LinkedHashMap<String, String> params, int page) {
             this.params = params;
+            this.page = page;
         }
 
         @Override
         protected void onPreExecute() {
             progressBar.setVisibility(View.VISIBLE);
+            isLoading = true;
         }
 
         @Override
@@ -153,8 +182,11 @@ public class FragmentMyPhotos extends Fragment {
         @Override
         protected void onPostExecute(Photos photos) {
             progressBar.setVisibility(View.GONE);
+            isLoading = false;
             if (photos != null) {
                 if (photos.getStat().equalsIgnoreCase("ok")) {
+                    if (page == Integer.parseInt(photos.getPages()))
+                        hasMorePhotos = false;
                     setRecyclerView(photos.getPhotoList());
                 } else if (photos.getStat().equalsIgnoreCase("fail")) {
                     Toast.makeText(getActivity(),

@@ -25,6 +25,7 @@ import com.pixerf.flickr.model.Photos;
 import com.pixerf.flickr.photos.FlickrPhotos;
 import com.pixerf.flickr.view.adapter.PhotoAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FragmentSearchPhotos extends Fragment {
@@ -32,11 +33,12 @@ public class FragmentSearchPhotos extends Fragment {
     private static final String TAG = FragmentMyPhotos.class.getSimpleName();
     private static final int NO_OF_COLS = 2;
     private static final int ITEM_PER_PAGE = 100;
-
+    int visibleItemCount, totalItemCount, previousVisibleItem;
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private PhotoAdapter adapter;
-
+    private boolean isLoading = false;
+    private boolean hasMorePhotos = true;
     private OnFragmentInteractionListener mListener;
 
     public FragmentSearchPhotos() {
@@ -61,8 +63,29 @@ public class FragmentSearchPhotos extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(NO_OF_COLS, StaggeredGridLayoutManager.VERTICAL));
 
-        String searchQuery = PreferenceManager.getDefaultSharedPreferences(getActivity())
+        adapter = new PhotoAdapter(getActivity(), new ArrayList<Photo>());
+        recyclerView.setAdapter(adapter);
+
+        final String searchQuery = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getString(getString(R.string.search_query_preferences), null);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0) {
+                    visibleItemCount = recyclerView.getLayoutManager().getChildCount();
+                    totalItemCount = recyclerView.getLayoutManager().getItemCount();
+                    int[] arr = ((StaggeredGridLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPositions(null);
+                    previousVisibleItem = arr[0];
+
+                    if (!isLoading && hasMorePhotos) {
+                        if ((visibleItemCount + previousVisibleItem) >= totalItemCount) {
+                            searchPhotos(searchQuery);
+                        }
+                    }
+                }
+            }
+        });
 
         searchPhotos(searchQuery);
         return view;
@@ -96,7 +119,7 @@ public class FragmentSearchPhotos extends Fragment {
         int totalItems = recyclerView.getLayoutManager().getItemCount();
         int page = totalItems / ITEM_PER_PAGE + 1;
 
-        Log.e(TAG, "page = " + page);
+        Log.e(TAG, "totalsItems = " + totalItems + ", page = " + page);
 
         new PhotosTask(searchQuery, page).execute();
     }
@@ -112,8 +135,9 @@ public class FragmentSearchPhotos extends Fragment {
                 Log.e(TAG, "--------------------------");
             }*/
 
-            adapter = new PhotoAdapter(getActivity(), photoList);
-            recyclerView.setAdapter(adapter);
+            adapter.add(photoList);
+            adapter.notifyDataSetChanged();
+
         } else {
             Toast.makeText(getActivity(),
                     "Something went wrong. Make sure you have an active internet connection",
@@ -191,13 +215,14 @@ public class FragmentSearchPhotos extends Fragment {
         private int page;
 
         PhotosTask(String searchQuery, int page) {
+            progressBar.setVisibility(View.VISIBLE);
             this.searchQuery = searchQuery;
             this.page = page;
         }
 
         @Override
         protected void onPreExecute() {
-
+            isLoading = true;
         }
 
         @Override
@@ -208,8 +233,11 @@ public class FragmentSearchPhotos extends Fragment {
         @Override
         protected void onPostExecute(Photos photos) {
             progressBar.setVisibility(View.GONE);
+            isLoading = false;
             if (photos != null) {
                 if (photos.getStat().equalsIgnoreCase("ok")) {
+                    if (page == Integer.parseInt(photos.getPages()))
+                        hasMorePhotos = false;
                     setRecyclerView(photos.getPhotoList());
                 } else if (photos.getStat().equalsIgnoreCase("fail")) {
                     Toast.makeText(getActivity(),

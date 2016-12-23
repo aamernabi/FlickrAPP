@@ -1,7 +1,5 @@
 package com.pixerf.flickr.utils.imageutils;
 
-import android.util.Log;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -25,7 +23,7 @@ class CopyStream {
             }
         } catch (Exception ex) {
             ex.getStackTrace();
-            Log.e(TAG, ex.getMessage());
+            //Log.e(TAG, ex.getMessage());
         }
     }
 }

@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.pixerf.flickr.R;
-import com.pixerf.flickr.activities.PhotoActivity;
 import com.pixerf.flickr.model.Photo;
 import com.pixerf.flickr.utils.imageutils.ImageLoader;
+import com.pixerf.flickr.view.activities.PhotoActivity;
 
 import java.util.List;
 
@@ -63,6 +63,10 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
         //running = false;
         photoList.clear();
         //imageCache.evictAll();
+    }
+
+    public void add(List<Photo> list) {
+        this.photoList.addAll(list);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

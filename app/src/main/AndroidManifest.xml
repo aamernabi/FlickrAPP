@@ -8,12 +8,13 @@
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="true"
         android:icon="@mipmap/flickr"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.pixerf.flickr.activities.LoginActivity"
+            android:name=".view.activities.LoginActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize">
 
@@ -29,12 +30,12 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name="com.pixerf.flickr.activities.Dashboard"
+            android:name=".view.activities.Dashboard"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name="com.pixerf.flickr.activities.PhotoActivity"
+            android:name=".view.activities.PhotoActivity"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>
 

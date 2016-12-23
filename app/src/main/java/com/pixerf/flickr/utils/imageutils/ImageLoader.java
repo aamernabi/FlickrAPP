@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.pixerf.flickr.R;
@@ -83,9 +82,7 @@ public class ImageLoader {
             return bitmap;
         } catch (Throwable ex) {
             ex.printStackTrace();
-            Log.e(TAG, ex.getMessage());
-            if (ex instanceof OutOfMemoryError)
-                memoryCache.clear();
+            //Log.e(TAG, ex.getMessage());
             return null;
         }
     }
@@ -115,7 +112,7 @@ public class ImageLoader {
             return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
         } catch (FileNotFoundException e) {
             e.getStackTrace();
-            Log.e(TAG, e.getMessage());
+            //Log.e(TAG, e.getMessage());
         }
         return null;
     }
@@ -158,7 +155,7 @@ public class ImageLoader {
                 bmp = getBitmap(photoToLoad.url);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-                Log.e(TAG, e.getMessage());
+                //Log.e(TAG, e.getMessage());
             }
             memoryCache.put(photoToLoad.url, bmp);
             if (imageViewReused(photoToLoad))

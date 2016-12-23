@@ -1,7 +1,6 @@
 package com.pixerf.flickr.utils.imageutils;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,7 +27,7 @@ class MemoryCache {
 
     private void setLimit(long new_limit) {
         limit = new_limit;
-        Log.i(TAG, "MemoryCache will use up to " + limit / 1024. / 1024. + "MB");
+        //Log.i(TAG, "MemoryCache will use up to " + limit / 1024. / 1024. + "MB");
     }
 
     Bitmap get(String id) {
@@ -39,7 +38,7 @@ class MemoryCache {
             return cache.get(id);
         } catch (NullPointerException ex) {
             ex.printStackTrace();
-            Log.e(TAG, ex.getMessage());
+            //Log.e(TAG, ex.getMessage());
             return null;
         }
     }
@@ -57,7 +56,7 @@ class MemoryCache {
     }
 
     private void checkSize() {
-        Log.i(TAG, "cache size = " + size + ", length = " + cache.size());
+        //Log.i(TAG, "cache size = " + size + ", length = " + cache.size());
         if (size > limit) {
             Iterator<Entry<String, Bitmap>> iter = cache.entrySet().iterator();//least recently accessed item will be the first one iterated
             while (iter.hasNext()) {
@@ -67,7 +66,7 @@ class MemoryCache {
                 if (size <= limit)
                     break;
             }
-            Log.i(TAG, "Clean cache. New size " + cache.size());
+            //Log.i(TAG, "Clean cache. New size " + cache.size());
         }
     }
 
@@ -78,7 +77,7 @@ class MemoryCache {
             size = 0;
         } catch (NullPointerException ex) {
             ex.printStackTrace();
-            Log.e(TAG, ex.getMessage());
+            //Log.e(TAG, ex.getMessage());
         }
     }
 
